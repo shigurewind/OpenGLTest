@@ -206,7 +206,7 @@ int main(void)
 	glUniform4f(location, 1.0f, 1.0f, 0.0f, 1.0f);// uniform変数に色を設定(黄色)
 
 	//色の変数を作る
-	float r = 0.0f; // 赤の値
+	float r = 1.0f; // 赤の値
 	float increment = 0.05f; // 赤の値の増加量
 
     /* Loop until the user closes the window */

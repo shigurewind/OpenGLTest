@@ -1,0 +1,254 @@
+
+#include<GL/glew.h>
+#include <GLFW/glfw3.h>
+
+#include<iostream>
+#include<fstream>
+#include<string>
+#include<sstream>
+
+// OpenGLのエラーをチェックするためのヘッダーファイル
+#define ASSERT(x) if (!(x)) __debugbreak(); // アサーションの定義,MSVCのデバッグブレークポイントを使用
+//全てののGL関数の呼び出しをラップするマクロを定義
+#define GLCall(x) GLClearError();\
+    x;\
+    ASSERT(GLLogCall(#x,__FILE__,__LINE__ )) // OpenGLのエラーをチェックするマクロ
+
+
+static void GLClearError() // OpenGLのエラーをクリアする関数
+{
+	while (glGetError() != GL_NO_ERROR);// エラーがなくなるまでループ
+}
+
+static bool GLLogCall(const char* function, const char*file, int line ) // OpenGLのエラーをチェックする関数
+{
+	while (GLenum error = glGetError()) // エラーがある限りループ
+	{
+		std::cout << "[OpenGL Error] (" << error << ") " << function << " " << file << ":" << line << std::endl; // エラーメッセージを表示
+		return false; // エラーが発生した場合はfalseを返す
+	}
+
+	return true; // エラーが発生しなかった場合はtrueを返す
+}
+
+
+//シェーダーのソースコードを格納するための構造体
+struct ShaderProgramSource
+{
+    std::string VertexSource;
+	std::string FragmentSource;
+};
+
+//シェーダーファイルを分けて読み込んで取得する
+static ShaderProgramSource ParseShader(const std::string& filepath)
+{
+	std::ifstream stream(filepath); // ファイルストリームを開く
+
+    enum class ShaderType
+    {
+        NONE = -1,
+		VERTEX = 0,
+		FRAGMENT = 1,
+    };
+
+	std::string line; // 行を格納する変数
+	std::stringstream ss[2]; // シェーダーのソースコードを格納するためのstringstreamを2つ用意
+	ShaderType type = ShaderType::NONE; // シェーダーのタイプを初期化    
+    while (getline(stream, line))
+    {
+		if (line.find("#shader") != std::string::npos) // "#shader"が行に含まれているかチェック
+		{
+            if (line.find("vertex") != std::string::npos)
+            {
+                //vertex shaderにセットする
+				type = ShaderType::VERTEX; // シェーダータイプを頂点シェーダーに設定
+            }
+            else if (line.find("fragment") != std::string::npos) 
+            {
+                //fragment shaderにセットする
+				type = ShaderType::FRAGMENT; // シェーダータイプをフラグメントシェーダーに設定
+            }
+		}
+		else
+		{
+			ss[(int)type] << line << "\n"; // 現在のシェーダータイプに対応するstringstreamに行を追加
+		}
+    }
+
+	return { ss[0].str(), ss[1].str() }; // シェーダーのソースコードを返す
+
+}
+
+
+static unsigned int CompileShader(unsigned int type, const std::string& source)
+{
+	unsigned int id = glCreateShader(type); // シェーダーのIDを作成
+	const char* src = source.c_str(); // ソースコードをCスタイル文字列に変換
+	glShaderSource(id, 1, &src, nullptr); // シェーダーのソースコードを設定
+	glCompileShader(id); // シェーダーをコンパイル
+
+	//TODO: エラーチェックを追加する
+	int result; // コンパイル結果を格納する変数
+	glGetShaderiv(id, GL_COMPILE_STATUS, &result); // コンパイルステータスを取得
+    if (result == GL_FALSE) // コンパイルに失敗した場合
+    {
+        int length;
+		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length); // エラーログの長さを取得
+		char* message = (char*)alloca(length * sizeof(char)); // エラーメッセージ用のステークメモリを確保
+		glGetShaderInfoLog(id, length, &length, message); // エラーメッセージを取得
+		std::cout << "Failed to compile "<<
+            (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << "shader!" << std::endl;
+		std::cout << message << std::endl; // エラーメッセージを表示
+		glDeleteShader(id); // シェーダーのIDを削除
+		return 0; // エラーが発生した場合は0を返す
+
+    }
+
+	return id; // コンパイルされたシェーダーのIDを返す
+}
+
+static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader)
+{
+	
+	unsigned int program = glCreateProgram();//プログラムを作成する
+	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);//頂点シェーダーを作成
+	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);//フラグメントシェーダーを作成
+
+	glAttachShader(program, vs); // プログラムに頂点シェーダーをアタッチ
+	glAttachShader(program, fs); // プログラムにフラグメントシェーダーをアタッチ
+	glLinkProgram(program); // プログラムをリンク
+	glValidateProgram(program); // プログラムのバリデーションを行う
+
+	glDeleteShader(vs); // シェーダーのIDを削除
+	glDeleteShader(fs); // シェーダーのIDを削除
+
+	return program; // 作成されたプログラムのIDを返す
+
+
+
+
+}
+
+
+int main(void)
+{
+    GLFWwindow* window;
+
+    /* Initialize the library */
+    if (!glfwInit())
+        return -1;
+
+    
+
+    /* Create a windowed mode window and its OpenGL context */
+    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    if (!window)
+    {
+        glfwTerminate();
+        return -1;
+    }
+
+    /* Make the window's context current */
+    glfwMakeContextCurrent(window);
+
+	glfwSwapInterval(1); // VSyncを有効にする(モニターのフレームレート同期する)
+
+    if (glewInit() != GLEW_OK) {
+        std::cout << "Error" << std::endl;
+    }
+
+    std::cout << glGetString(GL_VERSION) << std::endl;
+
+    //位置のデータ構造を作る
+    float positions[] = {
+        -0.5f, -0.5f,//0
+		 0.5f, -0.5f,//1
+		 0.5f,  0.5f,//2
+		-0.5f,  0.5f,//3
+		
+    };
+
+	//頂点のインデックスを作る
+	unsigned int indices[] = {
+		0, 1, 2, // 一つ目の三角形
+		2, 3, 0  // 二つ目の三角形
+	};
+
+
+    //OpenGLにデータを渡す
+    unsigned int buffer;//bufferを作る
+    glGenBuffers(1, &buffer);//bufferのID
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);//bufferをBindする
+    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);//頂点は6個,静的に描画
+
+    //Indexを起動
+    glEnableVertexAttribArray(0);
+    //OpenGLにどうやってデータを扱うのを教える
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8, 0);//index(位置だけだから0、一組何個、データ型、Normalizeするか、二つ頂点までのByte数、ポインター（数字、唯一の属性だから0）)
+
+    //
+	unsigned int ibo;//index buffer objectを作る
+    glGenBuffers(1, &ibo);//bufferのID
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);//bufferをBindする
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);//インデックスは6個,静的に描画
+
+
+    
+	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader"); // シェーダーのソースコードを読み込む
+	std::cout << "Vertex Shader: " << std::endl << source.VertexSource << std::endl;
+	std::cout << "Fragment Shader: " << std::endl << source.FragmentSource << std::endl;
+
+	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);//シェーダーを作成
+	glUseProgram(shader); // シェーダープログラムを使用
+
+	int location = glGetUniformLocation(shader, "u_Color"); // シェーダーのuniform変数の位置を取得
+	ASSERT(location != -1); // uniform変数が正しく取得できたかチェック
+	glUniform4f(location, 1.0f, 1.0f, 0.0f, 1.0f);// uniform変数に色を設定(黄色)
+
+	//色の変数を作る
+	float r = 0.0f; // 赤の値
+	float increment = 0.05f; // 赤の値の増加量
+
+    /* Loop until the user closes the window */
+    while (!glfwWindowShouldClose(window))
+    {
+        /* Render here */
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        ////三角形を描画(古いバージョンのOpenGL)
+        //glBegin(GL_TRIANGLES);
+        //glVertex2f(-0.5f, -0.5f);
+        //glVertex2f(0, 0.5f);
+        //glVertex2f(0.5f, -0.5f);
+        //glEnd();
+
+		
+        glUniform4f(location, r, 1.0f, 0.0f, 1.0f);//Uniformは毎回描画する時に設置する
+		
+		GLCall( glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));//Indexを使って描画する(必ずunsigned intを使う)
+		
+		//赤色の値を更新
+		if (r > 1.0f)
+		{
+			increment = -0.05f;
+		}
+		else if (r < 0.0f) 
+		{
+			increment = 0.05f;
+		}
+
+		r += increment; // 赤の値を更新
+
+
+        /* Swap front and back buffers */
+        glfwSwapBuffers(window);
+
+        /* Poll for and process events */
+        glfwPollEvents();
+    }
+
+	glDeleteProgram(shader); // シェーダープログラムのIDを削除
+
+    glfwTerminate();
+    return 0;
+}

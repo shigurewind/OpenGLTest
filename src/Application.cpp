@@ -7,29 +7,9 @@
 #include<string>
 #include<sstream>
 
-// OpenGLのエラーをチェックするためのヘッダーファイル
-#define ASSERT(x) if (!(x)) __debugbreak(); // アサーションの定義,MSVCのデバッグブレークポイントを使用
-//全てののGL関数の呼び出しをラップするマクロを定義
-#define GLCall(x) GLClearError();\
-    x;\
-    ASSERT(GLLogCall(#x,__FILE__,__LINE__ )) // OpenGLのエラーをチェックするマクロ
-
-
-static void GLClearError() // OpenGLのエラーをクリアする関数
-{
-	while (glGetError() != GL_NO_ERROR);// エラーがなくなるまでループ
-}
-
-static bool GLLogCall(const char* function, const char*file, int line ) // OpenGLのエラーをチェックする関数
-{
-	while (GLenum error = glGetError()) // エラーがある限りループ
-	{
-		std::cout << "[OpenGL Error] (" << error << ") " << function << " " << file << ":" << line << std::endl; // エラーメッセージを表示
-		return false; // エラーが発生した場合はfalseを返す
-	}
-
-	return true; // エラーが発生しなかった場合はtrueを返す
-}
+#include "Renderer.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 
 //シェーダーのソースコードを格納するための構造体
@@ -163,109 +143,109 @@ int main(void)
 
     std::cout << glGetString(GL_VERSION) << std::endl;
 
-    //位置のデータ構造を作る
-    float positions[] = {
-        -0.5f, -0.5f,//0
-		 0.5f, -0.5f,//1
-		 0.5f,  0.5f,//2
-		-0.5f,  0.5f,//3
-		
-    };
+	{ // スコープを作成してリソースの管理を行う
 
-	//頂点のインデックスを作る
-	unsigned int indices[] = {
-		0, 1, 2, // 一つ目の三角形
-		2, 3, 0  // 二つ目の三角形
-	};
+	//位置のデータ構造を作る
+		float positions[] = {
+			-0.5f, -0.5f,//0
+			 0.5f, -0.5f,//1
+			 0.5f,  0.5f,//2
+			-0.5f,  0.5f,//3
 
-	unsigned int vao; // Vertex Array Objectを作成するための変数
-	glGenVertexArrays(1, &vao); // VAOを生成
-	glBindVertexArray(vao); // VAOをバインドして有効にする
+		};
 
-    //OpenGLにデータを渡す
-    unsigned int buffer;//bufferを作る
-    glGenBuffers(1, &buffer);//bufferのID
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);//bufferをBindする
-    glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);//頂点は6個,静的に描画
+		//頂点のインデックスを作る
+		unsigned int indices[] = {
+			0, 1, 2, // 一つ目の三角形
+			2, 3, 0  // 二つ目の三角形
+		};
 
-    //Indexを起動
-	GLCall(glEnableVertexAttribArray(0));//頂点属性を有効にする(0は位置の属性のインデックス)
-    //OpenGLにどうやってデータを扱うのを教える
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);//index(位置だけだから0、一組何個、データ型、Normalizeするか、二つ頂点までのByte数、ポインター（数字、唯一の属性だから0）)
-
-    //
-	unsigned int ibo;//index buffer objectを作る
-    glGenBuffers(1, &ibo);//bufferのID
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);//bufferをBindする
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);//インデックスは6個,静的に描画
-
-
-    
-	ShaderProgramSource source = ParseShader("res/shaders/Basic.shader"); // シェーダーのソースコードを読み込む
-	std::cout << "Vertex Shader: " << std::endl << source.VertexSource << std::endl;
-	std::cout << "Fragment Shader: " << std::endl << source.FragmentSource << std::endl;
-
-	unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);//シェーダーを作成
-	glUseProgram(shader); // シェーダープログラムを使用
-
-	int location = glGetUniformLocation(shader, "u_Color"); // シェーダーのuniform変数の位置を取得
-	ASSERT(location != -1); // uniform変数が正しく取得できたかチェック
-	glUniform4f(location, 1.0f, 1.0f, 0.0f, 1.0f);// uniform変数に色を設定(黄色)
-
-	glBindVertexArray(0); // VAOのバインドを解除
-	glUseProgram(0); // シェーダープログラムの使用を停止
-	glBindBuffer(GL_ARRAY_BUFFER, 0); // バッファのバインドを解除
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // インデックスバッファのバインドを解除
-
-	//色の変数を作る
-	float r = 1.0f; // 赤の値
-	float increment = 0.05f; // 赤の値の増加量
-
-    /* Loop until the user closes the window */
-    while (!glfwWindowShouldClose(window))
-    {
-        /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        ////三角形を描画(古いバージョンのOpenGL)
-        //glBegin(GL_TRIANGLES);
-        //glVertex2f(-0.5f, -0.5f);
-        //glVertex2f(0, 0.5f);
-        //glVertex2f(0.5f, -0.5f);
-        //glEnd();
-
-		glUseProgram(shader); 
-        glUniform4f(location, r, 1.0f, 0.0f, 1.0f);//Uniformは毎回描画する時に設置する
-
-		
+		unsigned int vao; // Vertex Array Objectを作成するための変数
+		glGenVertexArrays(1, &vao); // VAOを生成
 		glBindVertexArray(vao); // VAOをバインドして有効にする
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
-		
-		
-		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));//Indexを使って描画する(必ずunsigned intを使う)
-		
-		//赤色の値を更新
-		if (r > 1.0f)
+		//頂点バッファを作成
+		VertexBuffer vb(positions, 4 * 2 * sizeof(float)); // (4つの頂点、各頂点は2つのfloat値を持つ)
+
+		//Indexを起動
+		GLCall(glEnableVertexAttribArray(0));//頂点属性を有効にする(0は位置の属性のインデックス)
+		//OpenGLにどうやってデータを扱うのを教える
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);//index(位置だけだから0、一組何個、データ型、Normalizeするか、二つ頂点までのByte数、ポインター（数字、唯一の属性だから0）)
+
+		// インデックスバッファを作成
+		IndexBuffer ib(indices, 6); // (6つのインデックスを持つ)
+
+
+
+		ShaderProgramSource source = ParseShader("res/shaders/Basic.shader"); // シェーダーのソースコードを読み込む
+		std::cout << "Vertex Shader: " << std::endl << source.VertexSource << std::endl;
+		std::cout << "Fragment Shader: " << std::endl << source.FragmentSource << std::endl;
+
+		unsigned int shader = CreateShader(source.VertexSource, source.FragmentSource);//シェーダーを作成
+		glUseProgram(shader); // シェーダープログラムを使用
+
+		int location = glGetUniformLocation(shader, "u_Color"); // シェーダーのuniform変数の位置を取得
+		ASSERT(location != -1); // uniform変数が正しく取得できたかチェック
+		glUniform4f(location, 1.0f, 1.0f, 0.0f, 1.0f);// uniform変数に色を設定(黄色)
+
+		glBindVertexArray(0); // VAOのバインドを解除
+		glUseProgram(0); // シェーダープログラムの使用を停止
+		glBindBuffer(GL_ARRAY_BUFFER, 0); // バッファのバインドを解除
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // インデックスバッファのバインドを解除
+
+		//色の変数を作る
+		float r = 1.0f; // 赤の値
+		float increment = 0.05f; // 赤の値の増加量
+
+		/* Loop until the user closes the window */
+		while (!glfwWindowShouldClose(window))
 		{
-			increment = -0.05f;
+			/* Render here */
+			glClear(GL_COLOR_BUFFER_BIT);
+
+			////三角形を描画(古いバージョンのOpenGL)
+			//glBegin(GL_TRIANGLES);
+			//glVertex2f(-0.5f, -0.5f);
+			//glVertex2f(0, 0.5f);
+			//glVertex2f(0.5f, -0.5f);
+			//glEnd();
+
+			glUseProgram(shader);
+			glUniform4f(location, r, 1.0f, 0.0f, 1.0f);//Uniformは毎回描画する時に設置する
+
+
+			glBindVertexArray(vao); // VAOをバインドして有効にする
+			ib.Bind(); // インデックスバッファをバインドして有効にする
+
+
+
+			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));//Indexを使って描画する(必ずunsigned intを使う)
+
+			//赤色の値を更新
+			if (r > 1.0f)
+			{
+				increment = -0.05f;
+			}
+			else if (r < 0.0f)
+			{
+				increment = 0.05f;
+			}
+
+			r += increment; // 赤の値を更新
+
+
+			/* Swap front and back buffers */
+			glfwSwapBuffers(window);
+
+			/* Poll for and process events */
+			glfwPollEvents();
 		}
-		else if (r < 0.0f) 
-		{
-			increment = 0.05f;
-		}
 
-		r += increment; // 赤の値を更新
+		glDeleteProgram(shader); // シェーダープログラムのIDを削除
 
-
-        /* Swap front and back buffers */
-        glfwSwapBuffers(window);
-
-        /* Poll for and process events */
-        glfwPollEvents();
-    }
-
-	glDeleteProgram(shader); // シェーダープログラムのIDを削除
+		//delete vb; // 頂点バッファのメモリを解放
+		//delete ib; // インデックスバッファのメモリを解放
+	}
 
     glfwTerminate();
     return 0;

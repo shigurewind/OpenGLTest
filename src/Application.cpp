@@ -138,6 +138,10 @@ int main(void)
     if (!glfwInit())
         return -1;
 
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // OpenGLのメジャーバージョンを3に設定
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // OpenGLのマイナーバージョンを3に設定
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // OpenGLのコアプロファイルを使用
+
     
 
     /* Create a windowed mode window and its OpenGL context */
@@ -174,17 +178,20 @@ int main(void)
 		2, 3, 0  // 二つ目の三角形
 	};
 
+	unsigned int vao; // Vertex Array Objectを作成するための変数
+	glGenVertexArrays(1, &vao); // VAOを生成
+	glBindVertexArray(vao); // VAOをバインドして有効にする
 
     //OpenGLにデータを渡す
     unsigned int buffer;//bufferを作る
     glGenBuffers(1, &buffer);//bufferのID
     glBindBuffer(GL_ARRAY_BUFFER, buffer);//bufferをBindする
-    glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), positions, GL_STATIC_DRAW);//頂点は6個,静的に描画
+    glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);//頂点は6個,静的に描画
 
     //Indexを起動
-    glEnableVertexAttribArray(0);
+	GLCall(glEnableVertexAttribArray(0));//頂点属性を有効にする(0は位置の属性のインデックス)
     //OpenGLにどうやってデータを扱うのを教える
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8, 0);//index(位置だけだから0、一組何個、データ型、Normalizeするか、二つ頂点までのByte数、ポインター（数字、唯一の属性だから0）)
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);//index(位置だけだから0、一組何個、データ型、Normalizeするか、二つ頂点までのByte数、ポインター（数字、唯一の属性だから0）)
 
     //
 	unsigned int ibo;//index buffer objectを作る
@@ -205,6 +212,11 @@ int main(void)
 	ASSERT(location != -1); // uniform変数が正しく取得できたかチェック
 	glUniform4f(location, 1.0f, 1.0f, 0.0f, 1.0f);// uniform変数に色を設定(黄色)
 
+	glBindVertexArray(0); // VAOのバインドを解除
+	glUseProgram(0); // シェーダープログラムの使用を停止
+	glBindBuffer(GL_ARRAY_BUFFER, 0); // バッファのバインドを解除
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // インデックスバッファのバインドを解除
+
 	//色の変数を作る
 	float r = 1.0f; // 赤の値
 	float increment = 0.05f; // 赤の値の増加量
@@ -222,10 +234,16 @@ int main(void)
         //glVertex2f(0.5f, -0.5f);
         //glEnd();
 
-		
+		glUseProgram(shader); 
         glUniform4f(location, r, 1.0f, 0.0f, 1.0f);//Uniformは毎回描画する時に設置する
+
 		
-		GLCall( glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));//Indexを使って描画する(必ずunsigned intを使う)
+		glBindVertexArray(vao); // VAOをバインドして有効にする
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+		
+		
+		GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));//Indexを使って描画する(必ずunsigned intを使う)
 		
 		//赤色の値を更新
 		if (r > 1.0f)

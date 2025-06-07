@@ -19,4 +19,30 @@ bool GLLogCall(const char* function, const char* file, int line) // OpenGLのエラ
 }
 
 
+//Renderer::Renderer() // コンストラクタ
+//{
+//	// OpenGLの初期化や設定が必要な場合はここに記述
+//}
+//
+//Renderer::~Renderer() // デストラクタ
+//{
+//	// OpenGLのリソース解放が必要な場合はここに記述
+//	// 例えば、VAOやVBOの削除など
+//}
+
+void Renderer::Clear() const // 画面をクリアする関数
+{
+	GLCall(glClear(GL_COLOR_BUFFER_BIT)); // カラーバッファと深度バッファをクリア
+}
+
+void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
+{
+	shader.Bind();
+	va.Bind();
+	ib.Bind();
+
+	GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));//IndexBufferを使って描画する(必ずunsigned intを使う)
+}
+
+
 

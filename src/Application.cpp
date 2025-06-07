@@ -8,7 +8,9 @@
 #include<sstream>
 
 #include "Renderer.h"
+
 #include "VertexBuffer.h"
+#include "VertexBufferLayout.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
@@ -90,6 +92,8 @@ int main(void)
 		vb.UnBind(); // 頂点バッファのバインドを解除
 		ib.UnBind(); // インデックスバッファのバインドを解除
 		shader.UnBind(); // シェーダープログラムの使用を停止
+
+		Renderer renderer; // レンダラーのインスタンスを作成
 		
 
 		//色の変数を作る
@@ -100,25 +104,16 @@ int main(void)
 		while (!glfwWindowShouldClose(window))
 		{
 			/* Render here */
-			glClear(GL_COLOR_BUFFER_BIT);
+			renderer.Clear(); // 画面をクリア
 
-			////三角形を描画(古いバージョンのOpenGL)
-			//glBegin(GL_TRIANGLES);
-			//glVertex2f(-0.5f, -0.5f);
-			//glVertex2f(0, 0.5f);
-			//glVertex2f(0.5f, -0.5f);
-			//glEnd();
-
+			//--------------
 			shader.Bind(); // シェーダープログラムをバインドして使用可能にする
 			shader.SetUniform4f("u_Color", r, 1.0f, 0.0f, 1.0f); // シェーダーのuniform変数に色を設定
+			//--------------ここのコード省略したいならMaterialsを使う必要があります
+
+			renderer.Draw(va, ib, shader); // レンダラーを使用してVAOとIBOを描画
+
 			
-
-
-			va.Bind();
-			ib.Bind(); // インデックスバッファをバインドして有効にする
-
-
-			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));//Indexを使って描画する(必ずunsigned intを使う)
 
 			//赤色の値を更新
 			if (r > 1.0f)

@@ -14,6 +14,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
 
 
 
@@ -54,12 +55,12 @@ int main(void)
 
 	{ // スコープを作成してリソースの管理を行う
 
-	//位置のデータ構造を作る
+	//位置とテクスチャのデータ構造を作る
 		float positions[] = {
-			-0.5f, -0.5f,//0
-			 0.5f, -0.5f,//1
-			 0.5f,  0.5f,//2
-			-0.5f,  0.5f,//3
+			-0.5f, -0.5f, 0.0f, 0.0f,//0
+			 0.5f, -0.5f, 1.0f, 0.0f,//1
+			 0.5f,  0.5f, 1.0f, 1.0f,//2
+			-0.5f,  0.5f, 0.0f, 1.0f,//3
 
 		};
 
@@ -69,14 +70,18 @@ int main(void)
 			2, 3, 0  // 二つ目の三角形
 		};
 
+		glEnable(GL_BLEND); // ブレンドを有効にする
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // ブレンド関数を設定(アルファブレンディングを有効にする)
+
 		//vertex array abstractを作成----------------
 		VertexArray va;
 		//頂点バッファを作成
-		VertexBuffer vb(positions, 4 * 2 * sizeof(float)); // (4つの頂点、各頂点は2つのfloat値を持つ)
+		VertexBuffer vb(positions, 4 * 4 * sizeof(float)); // (4つの頂点、各頂点は4つのfloat値を持つ)
 
 		//頂点バッファのレイアウトを定義
 		VertexBufferLayout layout;
 		layout.Push<float>(2); // 2つのfloat値を持つ頂点属性を追加(位置データ)
+		layout.Push<float>(2); // 2つのfloat値を持つ頂点属性を追加(テクスチャデータ)
 		va.AddBuffer(vb, layout); // VAOに頂点バッファとレイアウトを追加
 		//--------------------------------------------
 
@@ -111,9 +116,12 @@ int main(void)
 			shader.SetUniform4f("u_Color", r, 1.0f, 0.0f, 1.0f); // シェーダーのuniform変数に色を設定
 			//--------------ここのコード省略したいならMaterialsを使う必要があります
 
+			Texture texture("res/textures/enemy.png"); // テクスチャを読み込む
+			texture.Bind(); // テクスチャをバインドして使用可能にする
+			shader.SetUniform1i("u_Texture", 0); // シェーダーのuniform変数にテクスチャユニットを設定(0番目のテクスチャユニットを使用)
+
 			renderer.Draw(va, ib, shader); // レンダラーを使用してVAOとIBOを描画
 
-			
 
 			//赤色の値を更新
 			if (r > 1.0f)

@@ -121,6 +121,11 @@ void Shader::UnBind() const
 	glUseProgram(0); // シェーダーのバインドを解除する
 }
 
+void Shader::SetUniform1i(const std::string& name, int value)
+{
+	glUniform1i(GetUniformLocation(name), value); // シェーダーのuniform変数に値を設定
+}
+
 void Shader::SetUniform1f(const std::string& name, float value)
 {
 	glUniform1f(GetUniformLocation(name), value); // シェーダーのuniform変数に値を設定
@@ -138,7 +143,7 @@ int Shader::GetUniformLocation(const std::string& name)
 		return m_UniformLocationCache[name];// キャッシュから位置を取得
 	}
 
-	unsigned int location = glGetUniformLocation(m_RendererID, name.c_str()); // シェーダーのuniform変数の位置を取得
+	int location = glGetUniformLocation(m_RendererID, name.c_str()); // シェーダーのuniform変数の位置を取得
 	if (location == -1)
 	{
 		std::cout << "Warning: uniform '" << name << "' doesn't exist!" << std::endl; // uniform変数が存在しない場合の警告

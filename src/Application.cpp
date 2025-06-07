@@ -10,6 +10,7 @@
 #include "Renderer.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
+#include "VertexArray.h"
 
 
 //シェーダーのソースコードを格納するための構造体
@@ -160,18 +161,19 @@ int main(void)
 			2, 3, 0  // 二つ目の三角形
 		};
 
-		unsigned int vao; // Vertex Array Objectを作成するための変数
-		glGenVertexArrays(1, &vao); // VAOを生成
-		glBindVertexArray(vao); // VAOをバインドして有効にする
-
+		//vertex array abstractを作成----------------
+		VertexArray va;
 		//頂点バッファを作成
 		VertexBuffer vb(positions, 4 * 2 * sizeof(float)); // (4つの頂点、各頂点は2つのfloat値を持つ)
 
-		//Indexを起動
-		GLCall(glEnableVertexAttribArray(0));//頂点属性を有効にする(0は位置の属性のインデックス)
-		//OpenGLにどうやってデータを扱うのを教える
-		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);//index(位置だけだから0、一組何個、データ型、Normalizeするか、二つ頂点までのByte数、ポインター（数字、唯一の属性だから0）)
+		//頂点バッファのレイアウトを定義
+		VertexBufferLayout layout;
+		layout.Push<float>(2); // 2つのfloat値を持つ頂点属性を追加(位置データ)
+		va.AddBuffer(vb, layout); // VAOに頂点バッファとレイアウトを追加
+		
+		//--------------------------------------------
 
+		
 		// インデックスバッファを作成
 		IndexBuffer ib(indices, 6); // (6つのインデックスを持つ)
 
@@ -188,7 +190,7 @@ int main(void)
 		ASSERT(location != -1); // uniform変数が正しく取得できたかチェック
 		glUniform4f(location, 1.0f, 1.0f, 0.0f, 1.0f);// uniform変数に色を設定(黄色)
 
-		glBindVertexArray(0); // VAOのバインドを解除
+		va.UnBind(); // VAOのバインドを解除
 		glUseProgram(0); // シェーダープログラムの使用を停止
 		glBindBuffer(GL_ARRAY_BUFFER, 0); // バッファのバインドを解除
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // インデックスバッファのバインドを解除
@@ -214,9 +216,8 @@ int main(void)
 			glUniform4f(location, r, 1.0f, 0.0f, 1.0f);//Uniformは毎回描画する時に設置する
 
 
-			glBindVertexArray(vao); // VAOをバインドして有効にする
+			va.Bind();
 			ib.Bind(); // インデックスバッファをバインドして有効にする
-
 
 
 			GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));//Indexを使って描画する(必ずunsigned intを使う)

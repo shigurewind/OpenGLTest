@@ -16,6 +16,10 @@
 #include "Shader.h"
 #include "Texture.h"
 
+//数学ライブラリ
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 
 
 
@@ -88,10 +92,15 @@ int main(void)
 		// インデックスバッファを作成
 		IndexBuffer ib(indices, 6); // (6つのインデックスを持つ)
 
+
+		glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f); // 正射影行列を作成
+
+
 		// シェーダーを読み込む
 		Shader shader("res/shaders/Basic.shader"); // シェーダーを読み込む
 		shader.Bind(); // シェーダーをバインドして使用可能にする
 		shader.SetUniform4f("u_Color", 1.0f, 1.0f, 0.0f, 1.0f); // シェーダーのuniform変数に色を設定(黄色)
+		shader.SetUniformMat4f("u_MVP", proj); // シェーダーのuniform変数に正射影行列を設定
 
 		va.UnBind(); // VAOのバインドを解除
 		vb.UnBind(); // 頂点バッファのバインドを解除

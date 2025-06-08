@@ -61,10 +61,10 @@ int main(void)
 
 	//位置とテクスチャのデータ構造を作る
 		float positions[] = {
-			-0.5f, -0.5f, 0.0f, 0.0f,//0
-			 0.5f, -0.5f, 1.0f, 0.0f,//1
-			 0.5f,  0.5f, 1.0f, 1.0f,//2
-			-0.5f,  0.5f, 0.0f, 1.0f,//3
+			100.0f, 100.0f, 0.0f, 0.0f,//0
+			200.0f, 100.0f, 1.0f, 0.0f,//1
+			200.0f, 200.0f, 1.0f, 1.0f,//2
+			100.0,  200.0f, 0.0f, 1.0f,//3
 
 		};
 
@@ -93,14 +93,17 @@ int main(void)
 		IndexBuffer ib(indices, 6); // (6つのインデックスを持つ)
 
 
-		glm::mat4 proj = glm::ortho(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f); // 正射影行列を作成
+		glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 640.0f, -1.0f, 1.0f); // 正射影行列を作成
+		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0, 0)); // ビュー行列を作成
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200,200,0)); // モデル行列
 
+		glm::mat4 mvp = proj * view * model; // モデルビュー投影行列を計算
 
 		// シェーダーを読み込む
 		Shader shader("res/shaders/Basic.shader"); // シェーダーを読み込む
 		shader.Bind(); // シェーダーをバインドして使用可能にする
 		shader.SetUniform4f("u_Color", 1.0f, 1.0f, 0.0f, 1.0f); // シェーダーのuniform変数に色を設定(黄色)
-		shader.SetUniformMat4f("u_MVP", proj); // シェーダーのuniform変数に正射影行列を設定
+		shader.SetUniformMat4f("u_MVP", mvp); // シェーダーのuniform変数に正射影行列を設定
 
 		va.UnBind(); // VAOのバインドを解除
 		vb.UnBind(); // 頂点バッファのバインドを解除

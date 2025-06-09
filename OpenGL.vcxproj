@@ -70,6 +70,18 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -83,6 +95,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLEW\lib\Release\Win32;$(SolutionDir)Dependencies\GLFW\lib-vc2022</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib;</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -117,6 +131,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\GLEW\lib\Release\Win32;$(SolutionDir)Dependencies\GLFW\lib-vc2022</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32s.lib;glfw3.lib;opengl32.lib;User32.lib;Gdi32.lib;Shell32.lib;</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -145,6 +161,10 @@
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\vendor\glm\detail\glm.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_demo.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="src\vendor\imgui\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="src\vendor\stb_image\stb_image.cpp" />
     <ClCompile Include="src\VertexArray.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
@@ -583,6 +603,13 @@
     <ClInclude Include="src\vendor\glm\vec3.hpp" />
     <ClInclude Include="src\vendor\glm\vec4.hpp" />
     <ClInclude Include="src\vendor\glm\vector_relational.hpp" />
+    <ClInclude Include="src\vendor\imgui\imconfig.h" />
+    <ClInclude Include="src\vendor\imgui\imgui.h" />
+    <ClInclude Include="src\vendor\imgui\imgui_impl_glfw_gl3.h" />
+    <ClInclude Include="src\vendor\imgui\imgui_internal.h" />
+    <ClInclude Include="src\vendor\imgui\stb_rect_pack.h" />
+    <ClInclude Include="src\vendor\imgui\stb_textedit.h" />
+    <ClInclude Include="src\vendor\imgui\stb_truetype.h" />
     <ClInclude Include="src\vendor\stb_image\stb_image.h" />
     <ClInclude Include="src\VertexArray.h" />
     <ClInclude Include="src\VertexBuffer.h" />

@@ -64,10 +64,10 @@ int main(void)
 
 	//位置とテクスチャのデータ構造を作る
 		float positions[] = {
-			100.0f, 100.0f, 0.0f, 0.0f,//0
-			200.0f, 100.0f, 1.0f, 0.0f,//1
-			200.0f, 200.0f, 1.0f, 1.0f,//2
-			100.0,  200.0f, 0.0f, 1.0f,//3
+			-50.0f, -50.0f, 0.0f, 0.0f,//0
+			 50.0f, -50.0f, 1.0f, 0.0f,//1
+			 50.0f,  50.0f, 1.0f, 1.0f,//2
+			-50.0f,  50.0f, 0.0f, 1.0f,//3
 
 		};
 
@@ -97,12 +97,16 @@ int main(void)
 
 
 		glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 640.0f, -1.0f, 1.0f); // 正射影行列を作成
-		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100.0f, 0, 0)); // ビュー行列を作成
+		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0)); // ビュー行列を作成
 
 		// シェーダーを読み込む
 		Shader shader("res/shaders/Basic.shader"); // シェーダーを読み込む
 		shader.Bind(); // シェーダーをバインドして使用可能にする
 		shader.SetUniform4f("u_Color", 1.0f, 1.0f, 0.0f, 1.0f); // シェーダーのuniform変数に色を設定(黄色)
+
+		Texture texture("res/textures/enemy.png"); // テクスチャを読み込む 
+		texture.Bind(); // テクスチャをバインドして使用可能にする
+		shader.SetUniform1i("u_Texture", 0); // シェーダーのuniform変数にテクスチャユニットを設定(0番目のテクスチャユニットを使用)
 
 		va.UnBind(); // VAOのバインドを解除
 		vb.UnBind(); // 頂点バッファのバインドを解除
@@ -118,7 +122,9 @@ int main(void)
 
 		ImGui::StyleColorsDark();
 
-		glm::vec3 translation(200, 200, 0);
+		glm::vec3 translationA(200, 200, 0);
+		glm::vec3 translationB(400, 300, 0);
+		
 		
 		
 
@@ -135,24 +141,29 @@ int main(void)
 			//ImGuiの新しいフレームを開始
 			ImGui_ImplGlfwGL3_NewFrame();
 
-			glm::mat4 model = glm::translate(glm::mat4(1.0f), translation); // モデル行列
-
-			glm::mat4 mvp = proj * view * model; // モデルビュー投影行列を計算
+			
 
 
-			//--------------
+			
 			shader.Bind(); // シェーダープログラムをバインドして使用可能にする
-			shader.SetUniform4f("u_Color", r, 1.0f, 0.0f, 1.0f); // シェーダーのuniform変数に色を設定
+			//shader.SetUniform4f("u_Color", r, 1.0f, 0.0f, 1.0f); // シェーダーのuniform変数に色を設定
 
-			shader.SetUniformMat4f("u_MVP", mvp); // シェーダーのuniform変数に正射影行列を設定
+			{
+				glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA); // モデル行列
+				glm::mat4 mvp = proj * view * model; // モデルビュー投影行列を計算
+				shader.SetUniformMat4f("u_MVP", mvp); // シェーダーのuniform変数に正射影行列を設定
+				renderer.Draw(va, ib, shader); // レンダラーを使用してVAOとIBOを描画
+			}
+				
+			
+			{
+				glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB); // モデル行列
+				glm::mat4 mvp = proj * view * model; // モデルビュー投影行列を計算
+				shader.SetUniformMat4f("u_MVP", mvp); // シェーダーのuniform変数に正射影行列を設定
+				renderer.Draw(va, ib, shader); // レンダラーを使用してVAOとIBOを描画
+			}
 
-			//--------------ここのコード省略したいならMaterialsを使う必要があります
-
-			Texture texture("res/textures/enemy.png"); // テクスチャを読み込む
-			texture.Bind(); // テクスチャをバインドして使用可能にする
-			shader.SetUniform1i("u_Texture", 0); // シェーダーのuniform変数にテクスチャユニットを設定(0番目のテクスチャユニットを使用)
-
-			renderer.Draw(va, ib, shader); // レンダラーを使用してVAOとIBOを描画
+			
 
 
 			//赤色の値を更新
@@ -167,9 +178,12 @@ int main(void)
 
 			r += increment; // 赤の値を更新
 
+			
+
 			//ImGuiの内容
 			{
-				ImGui::SliderFloat3("Translation", &translation.x, 0.0f, 960.0f);            // Edit 1 float using a slider from 0.0f to 1.0f    
+				ImGui::SliderFloat3("TranslationA", &translationA.x, 0.0f, 960.0f); 
+				ImGui::SliderFloat3("TranslationB", &translationB.x, 0.0f, 960.0f);               
 
 				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 			}

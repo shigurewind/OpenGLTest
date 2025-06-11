@@ -37,9 +37,9 @@ void Renderer::Clear() const // 画面をクリアする関数
 
 void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
 {
-	shader.Bind();
-	va.Bind();
-	ib.Bind();
+	shader.Bind();// シェーダープログラムをバインドする
+	va.Bind();// 頂点配列オブジェクトをバインドする
+	ib.Bind();// インデックスバッファをバインドする
 
 	GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));//IndexBufferを使って描画する(必ずunsigned intを使う)
 }

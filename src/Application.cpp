@@ -23,6 +23,8 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
+#include "tests/TestClearColor.h"
+
 
 
 
@@ -62,56 +64,12 @@ int main(void)
 
 	{ // スコープを作成してリソースの管理を行う
 
-	//位置とテクスチャのデータ構造を作る
-		float positions[] = {
-			-50.0f, -50.0f, 0.0f, 0.0f,//0
-			 50.0f, -50.0f, 1.0f, 0.0f,//1
-			 50.0f,  50.0f, 1.0f, 1.0f,//2
-			-50.0f,  50.0f, 0.0f, 1.0f,//3
-
-		};
-
-		//頂点のインデックスを作る
-		unsigned int indices[] = {
-			0, 1, 2, // 一つ目の三角形
-			2, 3, 0  // 二つ目の三角形
-		};
+	
 
 		glEnable(GL_BLEND); // ブレンドを有効にする
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // ブレンド関数を設定(アルファブレンディングを有効にする)
 
-		//vertex array abstractを作成----------------
-		VertexArray va;
-		//頂点バッファを作成
-		VertexBuffer vb(positions, 4 * 4 * sizeof(float)); // (4つの頂点、各頂点は4つのfloat値を持つ)
-
-		//頂点バッファのレイアウトを定義
-		VertexBufferLayout layout;
-		layout.Push<float>(2); // 2つのfloat値を持つ頂点属性を追加(位置データ)
-		layout.Push<float>(2); // 2つのfloat値を持つ頂点属性を追加(テクスチャデータ)
-		va.AddBuffer(vb, layout); // VAOに頂点バッファとレイアウトを追加
-		//--------------------------------------------
-
-		// インデックスバッファを作成
-		IndexBuffer ib(indices, 6); // (6つのインデックスを持つ)
-
-
-		glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 640.0f, -1.0f, 1.0f); // 正射影行列を作成
-		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0)); // ビュー行列を作成
-
-		// シェーダーを読み込む
-		Shader shader("res/shaders/Basic.shader"); // シェーダーを読み込む
-		shader.Bind(); // シェーダーをバインドして使用可能にする
-		shader.SetUniform4f("u_Color", 1.0f, 1.0f, 0.0f, 1.0f); // シェーダーのuniform変数に色を設定(黄色)
-
-		Texture texture("res/textures/enemy.png"); // テクスチャを読み込む 
-		texture.Bind(); // テクスチャをバインドして使用可能にする
-		shader.SetUniform1i("u_Texture", 0); // シェーダーのuniform変数にテクスチャユニットを設定(0番目のテクスチャユニットを使用)
-
-		va.UnBind(); // VAOのバインドを解除
-		vb.UnBind(); // 頂点バッファのバインドを解除
-		ib.UnBind(); // インデックスバッファのバインドを解除
-		shader.UnBind(); // シェーダープログラムの使用を停止
+		
 
 		Renderer renderer; // レンダラーのインスタンスを作成
 
@@ -119,18 +77,11 @@ int main(void)
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		ImGui_ImplGlfwGL3_Init(window, true);
-
 		ImGui::StyleColorsDark();
 
-		glm::vec3 translationA(200, 200, 0);
-		glm::vec3 translationB(400, 300, 0);
-		
-		
-		
 
-		//色の変数を作る
-		float r = 1.0f; // 赤の値
-		float increment = 0.05f; // 赤の値の増加量
+		test::TestClearColor test; // テストクラスのインスタンスを作成
+		
 
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
@@ -138,55 +89,15 @@ int main(void)
 			/* Render here */
 			renderer.Clear(); // 画面をクリア
 
+			test.OnUpdate(0.0f); // テストクラスの更新処理を呼び出す
+			test.OnRender(); // テストクラスのレンダリング処理を呼び出す
+
+
 			//ImGuiの新しいフレームを開始
 			ImGui_ImplGlfwGL3_NewFrame();
 
-			
+			test.OnImGuiRender(); // テストクラスのImGuiレンダリング処理を呼び出す
 
-
-			
-			shader.Bind(); // シェーダープログラムをバインドして使用可能にする
-			//shader.SetUniform4f("u_Color", r, 1.0f, 0.0f, 1.0f); // シェーダーのuniform変数に色を設定
-
-			{
-				glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA); // モデル行列
-				glm::mat4 mvp = proj * view * model; // モデルビュー投影行列を計算
-				shader.SetUniformMat4f("u_MVP", mvp); // シェーダーのuniform変数に正射影行列を設定
-				renderer.Draw(va, ib, shader); // レンダラーを使用してVAOとIBOを描画
-			}
-				
-			
-			{
-				glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB); // モデル行列
-				glm::mat4 mvp = proj * view * model; // モデルビュー投影行列を計算
-				shader.SetUniformMat4f("u_MVP", mvp); // シェーダーのuniform変数に正射影行列を設定
-				renderer.Draw(va, ib, shader); // レンダラーを使用してVAOとIBOを描画
-			}
-
-			
-
-
-			//赤色の値を更新
-			if (r > 1.0f)
-			{
-				increment = -0.05f;
-			}
-			else if (r < 0.0f)
-			{
-				increment = 0.05f;
-			}
-
-			r += increment; // 赤の値を更新
-
-			
-
-			//ImGuiの内容
-			{
-				ImGui::SliderFloat3("TranslationA", &translationA.x, 0.0f, 960.0f); 
-				ImGui::SliderFloat3("TranslationB", &translationB.x, 0.0f, 960.0f);               
-
-				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-			}
 			
 			ImGui::Render();
 			ImGui_ImplGlfwGL3_RenderDrawData(ImGui::GetDrawData());

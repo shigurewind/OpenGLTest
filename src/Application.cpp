@@ -25,6 +25,7 @@
 
 #include "tests/Test.h"
 #include "tests/TestClearColor.h"
+#include "tests/TestTexture2D.h"
 
 
 
@@ -84,7 +85,8 @@ int main(void)
 		test::TestMenu* testMenu = new test::TestMenu(currentTest); // テストメニューのインスタンスを作成
 		currentTest = testMenu;
 
-		testMenu->RegisterTest<test::TestClearColor>("Clear Color");
+		testMenu->RegisterTest<test::TestClearColor>("Clear Color");// クリアカラーのテストを登録
+		testMenu->RegisterTest<test::TestTexture2D>("2D Texture"); // 2Dテクスチャのテストを登録
 
 		
 		

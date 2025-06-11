@@ -24,6 +24,8 @@ public:
 	/*Renderer();
 	~Renderer();*/
 	void Clear() const; // 画面をクリアする関数
+
+	//void SetClearColor(float r, float g, float b, float a) const; // クリアカラーを設定する関数
 	
 	void Draw(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
 

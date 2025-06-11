@@ -23,6 +23,7 @@
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_glfw_gl3.h"
 
+#include "tests/Test.h"
 #include "tests/TestClearColor.h"
 
 
@@ -79,24 +80,43 @@ int main(void)
 		ImGui_ImplGlfwGL3_Init(window, true);
 		ImGui::StyleColorsDark();
 
+		test::Test* currentTest = nullptr;
+		test::TestMenu* testMenu = new test::TestMenu(currentTest); // テストメニューのインスタンスを作成
+		currentTest = testMenu;
 
-		test::TestClearColor test; // テストクラスのインスタンスを作成
+		testMenu->RegisterTest<test::TestClearColor>("Clear Color");
+
+		
 		
 
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))
 		{
+			glClearColor(0.2f, 0.3f, 0.3f, 1.0f); // 背景色を設定
 			/* Render here */
 			renderer.Clear(); // 画面をクリア
 
-			test.OnUpdate(0.0f); // テストクラスの更新処理を呼び出す
-			test.OnRender(); // テストクラスのレンダリング処理を呼び出す
 
 
 			//ImGuiの新しいフレームを開始
 			ImGui_ImplGlfwGL3_NewFrame();
 
-			test.OnImGuiRender(); // テストクラスのImGuiレンダリング処理を呼び出す
+			if (currentTest)
+			{
+				currentTest->OnUpdate(0.0f);
+				currentTest->OnRender();
+				ImGui::Begin("Tests"); // ImGuiのウィンドウを開始
+
+				if (currentTest != testMenu && ImGui::Button("<-"))// テストメニューに戻る
+				{
+					delete currentTest;
+					currentTest = testMenu; 
+				}
+				currentTest->OnImGuiRender(); // 現在のテストのImGuiレンダリング処理を呼び出す
+
+				ImGui::End(); // ImGuiのウィンドウを終了
+			}
+
 
 			
 			ImGui::Render();
@@ -110,8 +130,16 @@ int main(void)
 			glfwPollEvents();
 		}
 
+		if (currentTest != testMenu)
+		{
+			delete testMenu;
+		}
+		delete currentTest; // 現在のテストを削除
+		
 		
 	}
+
+	
 
 	//ImGuiの終了処理
 	ImGui_ImplGlfwGL3_Shutdown();

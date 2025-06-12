@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 
+#include <GL/glew.h> 
+
 
 //シェーダーのソースコードを格納するための構造体
 struct ShaderProgramSource
@@ -20,7 +22,7 @@ private:
 	unsigned int m_RendererID; // シェーダーのレンダラーID
 
 	//caching for uniform locations
-	std::unordered_map<std::string, int> m_UniformLocationCache; // uniform変数の位置をキャッシュするためのマップ
+	mutable std::unordered_map<std::string, GLint> m_UniformLocationCache; // uniform変数の位置をキャッシュするためのマップ
 
 
 public:
@@ -42,7 +44,9 @@ private:
 	unsigned int CompileShader(unsigned int type, const std::string& source); // シェーダーをコンパイルする
 	unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader);
 
-	int GetUniformLocation(const std::string& name); // シェーダーのuniform変数の位置を取得する
+	GLint GetUniformLocation(const std::string& name) const; // シェーダーのuniform変数の位置を取得する
+
+	
 
 };
 

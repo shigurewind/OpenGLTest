@@ -36,7 +36,7 @@ namespace test
 
 		glEnable(GL_BLEND); // ブレンドを有効にする
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // ブレンド関数を設定(アルファブレンディングを有効にする)
-
+		
 		
 		m_VAO = std::make_unique<VertexArray>(); // 頂点配列オブジェクトを作成
 

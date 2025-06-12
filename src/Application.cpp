@@ -26,6 +26,7 @@
 #include "tests/Test.h"
 #include "tests/TestClearColor.h"
 #include "tests/TestTexture2D.h"
+#include "tests/TestVertexColor.h"
 
 
 
@@ -81,12 +82,17 @@ int main(void)
 		ImGui_ImplGlfwGL3_Init(window, true);
 		ImGui::StyleColorsDark();
 
+		// 日本語フォントの指定
+		//実際を表示したい日本語表示する前のダブルクォーテーションにu8を入れる（Unicode指定）
+		io.Fonts->AddFontFromFileTTF(u8"c:\\Windows\\Fonts\\meiryo.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+
 		test::Test* currentTest = nullptr;
 		test::TestMenu* testMenu = new test::TestMenu(currentTest); // テストメニューのインスタンスを作成
 		currentTest = testMenu;
 
 		testMenu->RegisterTest<test::TestClearColor>("Clear Color");// クリアカラーのテストを登録
 		testMenu->RegisterTest<test::TestTexture2D>("2D Texture"); // 2Dテクスチャのテストを登録
+		testMenu->RegisterTest<test::TestVertexColor>("VertexColor");
 
 		
 		
@@ -107,7 +113,7 @@ int main(void)
 			{
 				currentTest->OnUpdate(0.0f);
 				currentTest->OnRender();
-				ImGui::Begin("Tests"); // ImGuiのウィンドウを開始
+				ImGui::Begin(u8"テスト実行"); // ImGuiのウィンドウを開始
 
 				if (currentTest != testMenu && ImGui::Button("<-"))// テストメニューに戻る
 				{

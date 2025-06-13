@@ -126,6 +126,11 @@ void Shader::SetUniform1i(const std::string& name, int value)
 	glUniform1i(GetUniformLocation(name), value); // シェーダーのuniform変数に値を設定
 }
 
+void Shader::SetUniform1iv(const std::string& name,int size, int* value)
+{
+	glUniform1iv(GetUniformLocation(name), size, value); // シェーダーのuniform変数に値を設定
+}
+
 void Shader::SetUniform1f(const std::string& name, float value)
 {
 	glUniform1f(GetUniformLocation(name), value); // シェーダーのuniform変数に値を設定

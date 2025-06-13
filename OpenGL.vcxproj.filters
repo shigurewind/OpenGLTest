@@ -66,6 +66,9 @@
     <ClCompile Include="src\tests\TestVertexColor.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="src\tests\TestMultiTexture.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Basic.shader" />
@@ -484,6 +487,7 @@
       <Filter>ヘッダー ファイル</Filter>
     </None>
     <None Include="res\shaders\VertexColor.shader" />
+    <None Include="res\shaders\MultiTexture.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Renderer.h">
@@ -1405,6 +1409,9 @@
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
     <ClInclude Include="src\tests\TestVertexColor.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tests\TestMultiTexture.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>

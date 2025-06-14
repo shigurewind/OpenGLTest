@@ -28,6 +28,7 @@
 #include "tests/TestTexture2D.h"
 #include "tests/TestVertexColor.h"
 #include "tests/TestMultiTexture.h"
+#include "tests/TestDynamicGeometry.h"
 
 
 
@@ -95,6 +96,8 @@ int main(void)
 		testMenu->RegisterTest<test::TestTexture2D>("2D Texture"); // 2Dテクスチャのテストを登録
 		testMenu->RegisterTest<test::TestVertexColor>("VertexColor");
 		testMenu->RegisterTest<test::TestMultiTexture>("MultiTexture");
+		testMenu->RegisterTest<test::TestDynamicGeometry>("DynamicGeometry");
+		
 
 		
 		

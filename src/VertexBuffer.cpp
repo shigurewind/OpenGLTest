@@ -5,7 +5,7 @@ VertexBuffer::VertexBuffer(const void* data, unsigned int size)
 {
 	GLCall(glGenBuffers(1, &m_RendererID)); // バッファオブジェクトを生成
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID)); // バッファをバインド
-	GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW)); // データをバッファに転送
+	GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_DYNAMIC_DRAW)); // データをバッファに転送
 }
 
 VertexBuffer::~VertexBuffer()

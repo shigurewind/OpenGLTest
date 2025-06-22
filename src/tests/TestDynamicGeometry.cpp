@@ -82,8 +82,8 @@ namespace test
 		
 	{
 
-		m_Texture1 = std::make_unique<Texture>("res/textures/enemy.png");
-		m_Texture2 = std::make_unique<Texture>("res/textures/bullet.png");
+		m_Texture1 = std::make_unique<Texture>("res/textures/whale.png");
+		m_Texture2 = std::make_unique<Texture>("res/textures/deer.png");
 
 		m_TexEnemy = m_Texture1->GetRendererID();
 		m_TexBullet = m_Texture2->GetRendererID();

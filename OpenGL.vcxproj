@@ -164,6 +164,7 @@
     <ClCompile Include="src\tests\TestDynamicGeometry.cpp" />
     <ClCompile Include="src\tests\TestMultiTexture.cpp" />
     <ClCompile Include="src\tests\TestTexture2D.cpp" />
+    <ClCompile Include="src\tests\TestTextureCube.cpp" />
     <ClCompile Include="src\tests\TestVertexColor.cpp" />
     <ClCompile Include="src\Texture.cpp" />
     <ClCompile Include="src\vendor\glm\detail\glm.cpp" />
@@ -328,6 +329,7 @@
     <ClInclude Include="src\tests\TestDynamicGeometry.h" />
     <ClInclude Include="src\tests\TestMultiTexture.h" />
     <ClInclude Include="src\tests\TestTexture2D.h" />
+    <ClInclude Include="src\tests\TestTextureCube.h" />
     <ClInclude Include="src\tests\TestVertexColor.h" />
     <ClInclude Include="src\Texture.h" />
     <ClInclude Include="src\vendor\glm\common.hpp" />

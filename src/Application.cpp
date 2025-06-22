@@ -29,6 +29,7 @@
 #include "tests/TestVertexColor.h"
 #include "tests/TestMultiTexture.h"
 #include "tests/TestDynamicGeometry.h"
+#include "tests/TestTextureCube.h"
 
 
 
@@ -97,10 +98,9 @@ int main(void)
 		testMenu->RegisterTest<test::TestVertexColor>("VertexColor");
 		testMenu->RegisterTest<test::TestMultiTexture>("MultiTexture");
 		testMenu->RegisterTest<test::TestDynamicGeometry>("DynamicGeometry");
+		testMenu->RegisterTest<test::TestTextureCube>("TestTextureCube");
 		
 
-		
-		
 
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window))

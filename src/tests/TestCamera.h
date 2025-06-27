@@ -8,19 +8,28 @@
 
 #include <memory>
 
+
+
+
 namespace test
 {
-	class TestTextureCube : public Test
+	class TestCamera : public Test
 	{
 	public:
-		TestTextureCube();
-		~TestTextureCube();
+		TestCamera();
+		~TestCamera();
 
 		void OnUpdate(float deltaTime) override;
 		void OnRender() override;
 		void OnImGuiRender() override;
 
+		void OnKeyEvent(int key, int action) override;
+
+
+
 	private:
+		bool keys[1024] = { false };
+
 		std::unique_ptr< VertexArray> m_VAO;
 		std::unique_ptr< VertexBuffer> m_VertexBuffer;
 		std::unique_ptr < IndexBuffer> m_IndexBuffer;
@@ -28,7 +37,14 @@ namespace test
 		std::unique_ptr<Texture> m_Texture;
 
 		glm::mat4 m_Proj, m_View, m_Model;
-		glm::vec3 cubePosition;
+		glm::vec3 cameraPosition;
+		glm::vec3 cameraTarget;
+		glm::vec3 cameraDirection;
+
+		glm::vec3 cameraFront;
+		glm::vec3 cameraUp;
+
+		float cameraSpeed;
 		
 		//CubeÇÃê¢äEç¿ïW
 		glm::vec3 cubePositions[10] = {

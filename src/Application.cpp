@@ -30,10 +30,14 @@
 #include "tests/TestMultiTexture.h"
 #include "tests/TestDynamicGeometry.h"
 #include "tests/TestTextureCube.h"
+#include "tests/TestCamera.h"
 
 
 
+test::Test* currentTest = nullptr;
+test::TestMenu* testMenu = nullptr;
 
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 int main(void)
 {
@@ -60,6 +64,8 @@ int main(void)
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+	
+
 	glfwSwapInterval(5); // VSyncを有効にする(1はモニターのフレームレート同期する)
 
     if (glewInit() != GLEW_OK) {
@@ -85,20 +91,24 @@ int main(void)
 		ImGui_ImplGlfwGL3_Init(window, true);
 		ImGui::StyleColorsDark();
 
+		//キーボード入力有効
+		glfwSetKeyCallback(window, key_callback);
+
 		// 日本語フォントの指定
 		//実際を表示したい日本語表示する前のダブルクォーテーションにu8を入れる（Unicode指定）
 		io.Fonts->AddFontFromFileTTF(u8"c:\\Windows\\Fonts\\meiryo.ttc", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
 
-		test::Test* currentTest = nullptr;
-		test::TestMenu* testMenu = new test::TestMenu(currentTest); // テストメニューのインスタンスを作成
+		
+		testMenu = new test::TestMenu(currentTest); // テストメニューのインスタンスを作成
 		currentTest = testMenu;
 
 		testMenu->RegisterTest<test::TestClearColor>("Clear Color");// クリアカラーのテストを登録
-		testMenu->RegisterTest<test::TestTexture2D>("2D Texture"); // 2Dテクスチャのテストを登録
+		testMenu->RegisterTest<test::TestTexture2D>("2D Texture");  // 2Dテクスチャのテストを登録
 		testMenu->RegisterTest<test::TestVertexColor>("VertexColor");
 		testMenu->RegisterTest<test::TestMultiTexture>("MultiTexture");
 		testMenu->RegisterTest<test::TestDynamicGeometry>("DynamicGeometry");
 		testMenu->RegisterTest<test::TestTextureCube>("TestTextureCube");
+		testMenu->RegisterTest<test::TestCamera>("TestCamera");
 		
 
 
@@ -160,4 +170,12 @@ int main(void)
 
     glfwTerminate();
     return 0;
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	//std::cout << "Key event: " << key << ", action: " << action << std::endl;
+
+	if (currentTest)
+		currentTest->OnKeyEvent(key, action);
 }

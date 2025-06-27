@@ -16,6 +16,9 @@ namespace test
 		virtual void OnUpdate(float deltaTime) {}
 		virtual void OnRender() {}
 		virtual void OnImGuiRender() {}
+
+		virtual void OnKeyEvent(int key, int action) {}
+
 	};
 
 	class TestMenu : public Test
@@ -35,6 +38,9 @@ namespace test
 		}
 
 
+		
+
+
 	private:
 		Test*& m_CurrentTest;
 		std::vector<std::pair<std::string, std::function<Test* ()>>> m_Tests;
@@ -44,3 +50,4 @@ namespace test
 	
 
 }
+

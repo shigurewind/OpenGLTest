@@ -1,4 +1,4 @@
-#include "TestTextureCube.h"
+#include "TestCamera.h"
 
 #include <GL/glew.h>
 #include "Renderer.h"
@@ -11,14 +11,16 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+
+
 namespace test
 {
-	TestTextureCube::TestTextureCube()
+	TestCamera::TestCamera()
 		:
 		m_Proj(glm::perspective(45.0f, 960.0f / 640.0f, 0.1f, 100.0f)),
 		m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -3.0f))),
 		m_Model(glm::rotate(glm::mat4(1.0f), -55.0f, glm::vec3(1.0f, 0.0f, 0.0f))),
-		cubePosition(0, 0, -3.0f)
+		cameraPosition(0, 0, 3.0f),cameraTarget(0,0,0),cameraSpeed(1.0f)
 	{
 		//位置とテクスチャのデータ構造を作る
 		float positions[] = {
@@ -67,6 +69,19 @@ namespace test
 		};
 
 		
+		//カメラ方向
+		cameraDirection = glm::normalize(cameraPosition - cameraTarget);
+
+		glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+		glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+
+		cameraUp = glm::cross(cameraDirection, cameraRight);
+
+		cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+
+		m_View = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f));
 
 		//頂点のインデックスを作る
 		//unsigned int indices[] = {
@@ -111,17 +126,29 @@ namespace test
 
 	}
 
-	TestTextureCube::~TestTextureCube()
+	TestCamera::~TestCamera()
 	{
 
 	}
 
-	void TestTextureCube::OnUpdate(float deltaTime)
+	void TestCamera::OnUpdate(float deltaTime)
 	{
+		
+
+		if (keys[GLFW_KEY_W])
+			cameraPosition += cameraSpeed * cameraFront;
+		if (keys[GLFW_KEY_S])
+			cameraPosition -= cameraSpeed * cameraFront;
+		if (keys[GLFW_KEY_A])
+			cameraPosition -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		if (keys[GLFW_KEY_D])
+			cameraPosition += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+
+		m_View = glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
 
 	}
 
-	void TestTextureCube::OnRender()
+	void TestCamera::OnRender()
 	{
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glEnable(GL_DEPTH_TEST);
@@ -141,7 +168,7 @@ namespace test
 
 			for (GLuint i = 0; i < 10; i++)
 			{
-				m_View = glm::translate(glm::mat4(1.0f), cubePosition);
+				//m_View = glm::translate(glm::mat4(1.0f), cameraPosition);
 				//m_Model = glm::rotate(glm::mat4(1.0f), (GLfloat)glfwGetTime() * 1.0f, cubePositions[i]);
 
 				float angle = 20.0f * i;
@@ -159,14 +186,32 @@ namespace test
 
 	}
 
-	void TestTextureCube::OnImGuiRender()
+	void TestCamera::OnImGuiRender()
 	{
 		//ImGui::SliderFloat3("TranslationA", &m_TranslationA.x, 0.0f, 960.0f);
-		ImGui::SliderFloat3("Position", &cubePosition.x, -5.0f, 5.0f);
+		ImGui::SliderFloat("CameraSpeed", &cameraSpeed, 0.1f, 5.0f);
+
+		ImGui::SliderFloat3("CameraPosition", &cameraPosition.x, -5.0f, 5.0f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
 	}
+
+
+	void TestCamera::OnKeyEvent(int key, int action)
+	{
+		if (key >= 0 && key < 1024)
+		{
+			if (action == GLFW_PRESS)
+				keys[key] = true;
+			else if (action == GLFW_RELEASE)
+				keys[key] = false;
+		}
+	}
+
 }
+
+
+
 
 

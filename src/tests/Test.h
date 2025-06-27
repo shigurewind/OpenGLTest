@@ -18,6 +18,8 @@ namespace test
 		virtual void OnImGuiRender() {}
 
 		virtual void OnKeyEvent(int key, int action) {}
+		virtual void OnMouseMove(double xpos, double ypos) {}
+		virtual void OnScroll(double xoffset, double yoffset) {}
 
 	};
 

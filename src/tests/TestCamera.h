@@ -24,6 +24,8 @@ namespace test
 		void OnImGuiRender() override;
 
 		void OnKeyEvent(int key, int action) override;
+		void OnMouseMove(double xpos, double ypos) override;
+		void OnScroll(double xoffset, double yoffset) override;
 
 
 
@@ -45,6 +47,12 @@ namespace test
 		glm::vec3 cameraUp;
 
 		float cameraSpeed;
+
+		float yaw = -90.0f, pitch = 0.0f, lastX = 320, lastY = 240;
+		
+		float fov = 45.0f;
+
+		bool firstMouse = true;
 		
 		//CubeÇÃê¢äEç¿ïW
 		glm::vec3 cubePositions[10] = {

@@ -37,7 +37,11 @@
 test::Test* currentTest = nullptr;
 test::TestMenu* testMenu = nullptr;
 
+bool freeMouse = true;
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void mouse_callback(GLFWwindow* w, double x, double y);
+void scroll_callback(GLFWwindow* w, double xo, double yo);
 
 int main(void)
 {
@@ -93,6 +97,9 @@ int main(void)
 
 		//キーボード入力有効
 		glfwSetKeyCallback(window, key_callback);
+		glfwSetCursorPosCallback(window, mouse_callback);
+		glfwSetScrollCallback(window, scroll_callback);
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 		// 日本語フォントの指定
 		//実際を表示したい日本語表示する前のダブルクォーテーションにu8を入れる（Unicode指定）
@@ -176,6 +183,23 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
 	//std::cout << "Key event: " << key << ", action: " << action << std::endl;
 
+	//自由にマオス使えるスイッチ
+	if (key == GLFW_KEY_TAB && action == GLFW_PRESS) {
+		freeMouse = !freeMouse;
+		glfwSetInputMode(window, GLFW_CURSOR,
+			freeMouse ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+	}
+
 	if (currentTest)
 		currentTest->OnKeyEvent(key, action);
+}
+
+
+void mouse_callback(GLFWwindow* w, double x, double y) {
+	if (!freeMouse && currentTest)
+		currentTest->OnMouseMove(x, y);
+}
+void scroll_callback(GLFWwindow* w, double xo, double yo) {
+	if (currentTest)
+		currentTest->OnScroll(xo, yo);
 }

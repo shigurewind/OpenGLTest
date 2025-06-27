@@ -11,7 +11,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
-
+extern bool freeMouse;
 
 namespace test
 {
@@ -20,7 +20,7 @@ namespace test
 		m_Proj(glm::perspective(45.0f, 960.0f / 640.0f, 0.1f, 100.0f)),
 		m_View(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -3.0f))),
 		m_Model(glm::rotate(glm::mat4(1.0f), -55.0f, glm::vec3(1.0f, 0.0f, 0.0f))),
-		cameraPosition(0, 0, 3.0f),cameraTarget(0,0,0),cameraSpeed(1.0f)
+		cameraPosition(0, 0, 3.0f),cameraTarget(0,0,0),cameraSpeed(0.5f)
 	{
 		//位置とテクスチャのデータ構造を作る
 		float positions[] = {
@@ -134,6 +134,8 @@ namespace test
 	void TestCamera::OnUpdate(float deltaTime)
 	{
 		
+		m_Proj = glm::perspective(glm::radians(fov), 960.0f / 640.0f, 0.1f, 100.0f);
+
 
 		if (keys[GLFW_KEY_W])
 			cameraPosition += cameraSpeed * cameraFront;
@@ -188,10 +190,13 @@ namespace test
 
 	void TestCamera::OnImGuiRender()
 	{
-		//ImGui::SliderFloat3("TranslationA", &m_TranslationA.x, 0.0f, 960.0f);
-		ImGui::SliderFloat("CameraSpeed", &cameraSpeed, 0.1f, 5.0f);
+		
+		ImGui::SliderFloat("CameraSpeed", &cameraSpeed, 0.01f, 2.0f);
 
 		ImGui::SliderFloat3("CameraPosition", &cameraPosition.x, -5.0f, 5.0f);
+
+		ImGui::Checkbox("Free Mouse", &freeMouse);
+		ImGui::SliderFloat("FOV", &fov, 1.0f, 90.0f);
 
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
@@ -207,6 +212,42 @@ namespace test
 			else if (action == GLFW_RELEASE)
 				keys[key] = false;
 		}
+
+		
+	}
+
+	void TestCamera::OnMouseMove(double xpos, double ypos) {
+		if (firstMouse)
+		{
+			lastX = float(xpos);
+			lastY = float(ypos);
+			firstMouse = false;
+			return;
+		}
+
+		float xoffset = float(xpos) - lastX;
+		float yoffset = lastY - float(ypos);
+		lastX = float(xpos); lastY = float(ypos);
+
+		float sensitivity = 0.1f;
+		yaw += xoffset * sensitivity;
+		pitch += yoffset * sensitivity;
+		pitch = glm::clamp(pitch, -89.0f, 89.0f);
+
+		glm::vec3 front;
+		front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		front.y = sin(glm::radians(pitch));
+		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		cameraFront = glm::normalize(front);
+	}
+
+	void TestCamera::OnScroll(double /*xoffset*/, double yoffset) {
+		if (fov >= 1.0f && fov <= 90.0f)
+			fov -= yoffset;
+		if (fov <= 1.0f)
+			fov = 1.0f;
+		if (fov >= 90.0f)
+			fov = 90.0f;
 	}
 
 }

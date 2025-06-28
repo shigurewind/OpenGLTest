@@ -23,6 +23,8 @@ namespace test
 		
 	{
 
+		glDisable(GL_DEPTH_TEST);//2DƒŒƒ“ƒ_ƒŠƒ“ƒOê—p
+
 		m_Texture1 = std::make_unique<Texture>("res/textures/whale.png");
 		m_Texture2 = std::make_unique<Texture>("res/textures/deer.png");
 

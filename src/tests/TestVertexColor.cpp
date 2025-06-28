@@ -19,6 +19,8 @@ namespace test
 		m_camera(0, 0, 0)
 		
 	{
+		glDisable(GL_DEPTH_TEST);//2Dレンダリング専用
+
 		//位置と色のデータ構造を作る
 		float vertices[] = {
 			-1.5f, -0.5f, 0.0f,	0.18f, 0.6f, 0.96f, 1.0f,	//0
